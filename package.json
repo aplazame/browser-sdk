@@ -2,8 +2,8 @@
   "name": "@aplazame/browser",
   "version": "0.0.1",
   "description": "Aplazame SDK for browser",
-  "main": "dist/index.js",
-  "module": "lib/index.mjs",
+  "main": "./dist/index.js",
+  "module": "./lib/index.mjs",
   "directories": {
     "lib": "lib"
   },
