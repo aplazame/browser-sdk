@@ -1,6 +1,6 @@
 {
   "name": "@aplazame/browser",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Aplazame SDK for browser",
   "main": "./dist/index.js",
   "module": "./lib/index.mjs",
