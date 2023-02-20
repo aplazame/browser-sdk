@@ -8,7 +8,7 @@
     "lib": "lib"
   },
   "scripts": {
-    "build": "esbuild ./lib/* --outdir=./dist --format=cjs",
+    "build": "esbuild ./lib/*.ts --outdir=./dist/cjs --format=cjs; esbuild ./lib/*.ts --outdir=./dist/esm --format=esm",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
