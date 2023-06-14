@@ -8,6 +8,7 @@
     "/dist"
   ],
   "scripts": {
+    "pre-publish": "npm run build",
     "esbuild": "esbuild ./lib/* --outdir=./dist --format=cjs",
     "build": "tsc --project tsconfig.json",
     "test": "jest"
