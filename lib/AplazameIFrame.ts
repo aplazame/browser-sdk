@@ -1,17 +1,35 @@
 
 import { EventEmitter, DetailsEvent } from './EventEmitter.js'
 
-const copyObject = obj => JSON.parse(JSON.stringify(obj))
+const copyObject = (obj: any) => JSON.parse(JSON.stringify(obj))
 
 export class AplazameEvent extends DetailsEvent {}
 
 export class AplazameIFrame extends EventEmitter {
-  #allowFilter = e => e.data?.source === 'aplazame'
-  #sendData = { source: 'aplazame' }
+  #allowFilter = (e: MessageEvent) => e.data?.source === 'aplazame'
+  #sendData: { [key: string]: string } = { source: 'aplazame' }
   #requestTimeout = 60000
 
-  constructor ({ url = null, searchParams = null, requestTimeout = null, allowFilter = null, sendData = null } = {}) {
+  url: URL
+  mount_el?: HTMLElement
+  iframe?: HTMLIFrameElement
+
+  constructor ({
+    url = null,
+    searchParams = null,
+    requestTimeout = null,
+    allowFilter = null,
+    sendData = null
+  }: {
+    url?: string | null,
+    searchParams?: { [key: string]: string } | null,
+    requestTimeout?: number | null,
+    allowFilter?: ((e: { data?: { source?: string } }) => boolean) | null,
+    sendData?: { [key: string]: string } | null
+  } = {}) {
     super({ Event: AplazameEvent })
+
+    if (!url) throw new Error('url is required')
 
     this.url = new URL(url)
 
@@ -24,7 +42,7 @@ export class AplazameIFrame extends EventEmitter {
     if (requestTimeout) this.#requestTimeout = requestTimeout
   }
 
-  #onMessage (e) {
+  #onMessage (e: MessageEvent) {
     if (!this.#allowFilter(e)) return
 
     if (e.data?.event) {
@@ -33,13 +51,15 @@ export class AplazameIFrame extends EventEmitter {
     }
   }
 
-  async request (request, _payload) {
+  async request (request: string, _payload: any = null) {
     const payload = _payload ? copyObject(_payload) : _payload
-    return new Promise(resolve => {
-      this.iframe.contentWindow.postMessage({ ...this.#sendData, request, payload }, '*')
+
+    return new Promise((resolve: (value: unknown) => void) => {
+      this.iframe?.contentWindow?.postMessage({ ...this.#sendData, request, payload }, '*')
+
       const onResponse = () => {
         this.off(request, onResponse)
-        resolve()
+        resolve(null)
       }
 
       setTimeout(onResponse, this.#requestTimeout)
@@ -47,12 +67,12 @@ export class AplazameIFrame extends EventEmitter {
     })
   }
 
-  async send (event, _payload) {
+  async send (event: string, _payload: unknown = null) {
     const payload = _payload ? copyObject(_payload) : _payload
-    this.iframe.contentWindow.postMessage({ ...this.#sendData, event, payload }, '*')
+    this.iframe?.contentWindow?.postMessage({ ...this.#sendData, event, payload }, '*')
   }
 
-  mount (el) {
+  mount (el: HTMLElement) {
     this.mount_el = el
 
     this.iframe = document.createElement('iframe')
@@ -73,7 +93,7 @@ export class AplazameIFrame extends EventEmitter {
   unmount () {
     this.emit('unmount')
 
-    if (this.mount_el.contains(this.iframe)) {
+    if (this.iframe && this.mount_el?.contains(this.iframe)) {
       this.mount_el.removeChild(this.iframe)
     }
   }
