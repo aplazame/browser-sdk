@@ -51,14 +51,13 @@ test('EventEmitter', async () => {
     expect(listener).toHaveBeenCalledTimes(1)
 })
 
-test('EventEmitter', async () => {
+test('EventEmitter.onAny > emit()', async () => {
     const ee = new EventEmitter()
     const listener = jest.fn()
 
     ee.onAny(listener)
 
     ee.emit('test')
-    // ee.emit('test2')
 
     await nextTick()
 
@@ -71,16 +70,13 @@ test('EventEmitter', async () => {
     )
 })
 
-test('EventEmitter', async () => {
+test('EventEmitter.onAny > emitSync()', async () => {
     const ee = new EventEmitter()
     const listener = jest.fn()
 
     ee.onAny(listener)
 
     ee.emitSync('test')
-    // ee.emit('test2')
-
-    // await nextTick()
 
     expect(listener).toHaveBeenCalledTimes(1)
     expect(listener).toHaveBeenNthCalledWith(
