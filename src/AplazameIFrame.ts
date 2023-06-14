@@ -22,7 +22,7 @@ export class AplazameIFrame extends EventEmitter {
     sendData = null
   }: {
     url?: string | null,
-    searchParams?: { [key: string]: string } | null,
+    searchParams?: { [key: string]: unknown } | null,
     requestTimeout?: number | null,
     allowFilter?: ((e: { data?: any }) => boolean) | null,
     sendData?: { [key: string]: string } | null
