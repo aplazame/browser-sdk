@@ -6,9 +6,9 @@ const copyObject = (obj: any) => JSON.parse(JSON.stringify(obj))
 export class AplazameEvent extends DetailsEvent {}
 
 export class AplazameIFrame extends EventEmitter {
-  #allowFilter = (e: MessageEvent) => e.data?.source === 'aplazame'
-  #sendData: { [key: string]: string } = { source: 'aplazame' }
-  #requestTimeout = 60000
+  allowFilter = (e: MessageEvent) => e.data?.source === 'aplazame'
+  sendData: { [key: string]: string } = { source: 'aplazame' }
+  requestTimeout = 60000
 
   url: URL
   mount_el?: HTMLElement
@@ -37,13 +37,13 @@ export class AplazameIFrame extends EventEmitter {
       for (const key in searchParams) this.url.searchParams.append(key, searchParams[key])
     }
 
-    if (allowFilter) this.#allowFilter = allowFilter
-    if (sendData) this.#sendData = sendData
-    if (requestTimeout) this.#requestTimeout = requestTimeout
+    if (allowFilter) this.allowFilter = allowFilter
+    if (sendData) this.sendData = sendData
+    if (requestTimeout) this.requestTimeout = requestTimeout
   }
 
-  #onMessage (e: MessageEvent) {
-    if (!this.#allowFilter(e)) return
+  onMessage (e: MessageEvent) {
+    if (!this.allowFilter(e)) return
 
     if (e.data?.event) {
       const { event, payload = null } = e.data
@@ -55,21 +55,21 @@ export class AplazameIFrame extends EventEmitter {
     const payload = _payload ? copyObject(_payload) : _payload
 
     return new Promise((resolve: (value: unknown) => void) => {
-      this.iframe?.contentWindow?.postMessage({ ...this.#sendData, request, payload }, '*')
+      this.iframe?.contentWindow?.postMessage({ ...this.sendData, request, payload }, '*')
 
       const onResponse = () => {
         this.off(request, onResponse)
         resolve(null)
       }
 
-      setTimeout(onResponse, this.#requestTimeout)
+      setTimeout(onResponse, this.requestTimeout)
       this.on(request, onResponse)
     })
   }
 
   async send (event: string, _payload: unknown = null) {
     const payload = _payload ? copyObject(_payload) : _payload
-    this.iframe?.contentWindow?.postMessage({ ...this.#sendData, event, payload }, '*')
+    this.iframe?.contentWindow?.postMessage({ ...this.sendData, event, payload }, '*')
   }
 
   mount (el: HTMLElement) {
@@ -82,7 +82,7 @@ export class AplazameIFrame extends EventEmitter {
     el.appendChild(this.iframe)
 
     // listening messages
-    const _onMessage = this.#onMessage.bind(this)
+    const _onMessage = this.onMessage.bind(this)
 
     window.addEventListener('message', _onMessage)
     this.once('unmount', () => window.removeEventListener('message', _onMessage))
