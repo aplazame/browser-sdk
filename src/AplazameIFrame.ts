@@ -15,7 +15,6 @@ const iframeStylesPresets: {
     width: '100%',
     height: '100%',
     border: 'none',
-    'z-index': '9999',
   },
   fill_absolute: {
     position: 'absolute',
@@ -125,7 +124,10 @@ export class AplazameIFrame extends EventEmitter {
     const iframe = this.iframe
 
     if (iframe) {
-      Object.keys(newSytles).forEach(key => iframe.style.setProperty(key, newSytles[key]))
+      Object.keys(newSytles).forEach(key => {
+        if (newSytles[key] === null) iframe.style.removeProperty(key)
+        else iframe.style.setProperty(key, newSytles[key])
+      })
     }
     return this
   }
