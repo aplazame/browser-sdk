@@ -8,14 +8,14 @@ export class AplazameEvent extends DetailsEvent {}
 const iframeStylesPresets: {
   [key: string]: { [key: string]: string }
 } = {
-  fullscreen: {
+  fill_fixed: {
     position: 'fixed',
     top: '0',
     left: '0',
     width: '100%',
     height: '100%',
     border: 'none',
-    zIndex: '9999'
+    'z-index': '9999',
   },
   fill_absolute: {
     position: 'absolute',
@@ -122,8 +122,10 @@ export class AplazameIFrame extends EventEmitter {
 
     this.currentStyles = { ...this.currentStyles, ...newSytles }
 
-    if (this.iframe) {
-      Object.assign(this.iframe.style, this.currentStyles)
+    const iframe = this.iframe
+
+    if (iframe) {
+      Object.keys(newSytles).forEach(key => iframe.style.setProperty(key, newSytles[key]))
     }
     return this
   }
@@ -136,7 +138,7 @@ export class AplazameIFrame extends EventEmitter {
     if (style?.length) {
       Array.from(style).forEach(key => style.removeProperty(key))
     }
-    
+
     return this
   }
 
