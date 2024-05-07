@@ -5,7 +5,7 @@ const copyObject = (obj: any) => JSON.parse(JSON.stringify(obj))
 
 export class AplazameEvent extends DetailsEvent {}
 
-const iframeStylesPresets: {
+const defaulsIframeStylesPresets: {
   [key: string]: { [key: string]: string }
 } = {
   fill_fixed: {
@@ -30,6 +30,7 @@ export class AplazameIFrame extends EventEmitter {
   allowFilter = (e: MessageEvent) => e.data?.source === 'aplazame'
   sendData: { [key: string]: string } = { source: 'aplazame' }
   requestTimeout = 60000
+  iframeStylesPresets = copyObject(defaulsIframeStylesPresets)
 
   url: URL
   mount_el?: HTMLElement
@@ -114,9 +115,14 @@ export class AplazameIFrame extends EventEmitter {
     return this
   }
 
+  addStylesPreset (name: string, styles: { [key: string]: string }) {
+    this.iframeStylesPresets[name] = styles
+    return this
+  }
+
   setStyles (styles: string | { [key: string]: string }) {
     const newSytles = typeof styles === 'string'
-      ? (iframeStylesPresets[styles] ?? {})
+      ? (this.iframeStylesPresets[styles] ?? {})
       : styles
 
     this.currentStyles = { ...this.currentStyles, ...newSytles }
