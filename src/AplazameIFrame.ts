@@ -37,6 +37,7 @@ export class AplazameIFrame extends EventEmitter {
   iframe?: HTMLIFrameElement
 
   currentStyles: { [key: string]: string } = {}
+  currentAttributes: { [key: string]: string } = {}
 
   constructor ({
     url = null,
@@ -103,6 +104,7 @@ export class AplazameIFrame extends EventEmitter {
     this.iframe.src = this.url.toString()
 
     Object.assign(this.iframe.style, this.currentStyles)
+    for (const key in this.currentAttributes) this.iframe.setAttribute(key, this.currentAttributes[key])
 
     el.appendChild(this.iframe)
 
@@ -138,6 +140,21 @@ export class AplazameIFrame extends EventEmitter {
     return this
   }
 
+  setAttributes (attributes: { [key: string]: string }) {
+    this.currentAttributes = { ...this.currentAttributes, ...attributes }
+
+    const iframe = this.iframe
+
+    if (iframe) {
+      for (const key in attributes) {
+        if (attributes[key] === null) iframe.removeAttribute(key)
+        else iframe.setAttribute(key, attributes[key])
+      }
+    }
+
+    return this
+  }
+
   resetStyles () {
     this.currentStyles = {}
 
@@ -148,6 +165,18 @@ export class AplazameIFrame extends EventEmitter {
     }
 
     return this
+  }
+
+  resetAttributes () {
+    const iframe = this.iframe
+
+    if (iframe) {
+      Object.keys(this.currentAttributes).forEach(key => iframe.removeAttribute(key))
+    }
+
+    this.currentAttributes = {}
+
+    return
   }
 
   unmount () {
