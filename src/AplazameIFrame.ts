@@ -36,7 +36,7 @@ export class AplazameIFrame extends EventEmitter {
   mount_el?: HTMLElement
   iframe?: HTMLIFrameElement
 
-  currentStyles: { [key: string]: string } = {}
+  currentStyles: { [key: string]: unknown, important?: Record<string, string> } = {}
   currentAttributes: { [key: string]: string } = {}
 
   constructor ({
@@ -103,8 +103,8 @@ export class AplazameIFrame extends EventEmitter {
     this.iframe = document.createElement('iframe')
     this.iframe.src = this.url.toString()
 
-    Object.assign(this.iframe.style, this.currentStyles)
-    for (const key in this.currentAttributes) this.iframe.setAttribute(key, this.currentAttributes[key])
+    this.applyStyles()
+    this.applyAttributes()
 
     el.appendChild(this.iframe)
 
@@ -122,19 +122,32 @@ export class AplazameIFrame extends EventEmitter {
     return this
   }
 
-  setStyles (styles: string | { [key: string]: string }) {
+  setStyles (styles: { [key: string]: unknown, important?: Record<string, string> } = {}) {
     const newSytles = typeof styles === 'string'
       ? (this.iframeStylesPresets[styles] ?? {})
       : styles
 
     this.currentStyles = { ...this.currentStyles, ...newSytles }
 
+    this.applyStyles()
+
+    return this
+  }
+
+  applyStyles (styles = this.currentStyles) {
     const iframe = this.iframe
 
     if (iframe) {
-      Object.keys(newSytles).forEach(key => {
-        if (newSytles[key] === null) iframe.style.removeProperty(key)
-        else iframe.style.setProperty(key, newSytles[key])
+      Object.keys(styles).forEach(key => {
+        if (key === 'important') {
+          for (const key in styles.important) {
+            iframe.style.setProperty(key, String(styles[key]), 'important')
+          }
+          return
+        }
+
+        if (styles[key] === null) iframe.style.removeProperty(key)
+        else iframe.style.setProperty(key, String(styles[key]))
       })
     }
     return this
@@ -143,6 +156,12 @@ export class AplazameIFrame extends EventEmitter {
   setAttributes (attributes: { [key: string]: string }) {
     this.currentAttributes = { ...this.currentAttributes, ...attributes }
 
+    this.applyAttributes()
+
+    return this
+  }
+
+  applyAttributes (attributes = this.currentAttributes) {
     const iframe = this.iframe
 
     if (iframe) {
