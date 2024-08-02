@@ -141,7 +141,7 @@ export class AplazameIFrame extends EventEmitter {
       Object.keys(styles).forEach(key => {
         if (key === 'important') {
           for (const key in styles.important) {
-            iframe.style.setProperty(key, String(styles[key]), 'important')
+            iframe.style.setProperty(key, String(styles.important[key]), 'important')
           }
           return
         }
