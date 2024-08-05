@@ -122,12 +122,19 @@ export class AplazameIFrame extends EventEmitter {
     return this
   }
 
-  setStyles (styles: { [key: string]: unknown, important?: Record<string, string> } = {}) {
+  setStyles (styles: { [key: string]: unknown, important?: Record<string, string> } | string = {}) {
     const newSytles = typeof styles === 'string'
       ? (this.iframeStylesPresets[styles] ?? {})
       : styles
 
-    this.currentStyles = { ...this.currentStyles, ...newSytles }
+    this.currentStyles = {
+      ...this.currentStyles,
+      ...newSytles,
+      important: {
+        ...this.currentStyles.important,
+        ...newSytles.important,
+      },
+    }
 
     this.applyStyles()
 
