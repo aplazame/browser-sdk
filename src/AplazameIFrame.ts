@@ -1,5 +1,14 @@
 
 import { EventEmitter, DetailsEvent } from './EventEmitter.js'
+import {
+  applyStylesToEl,
+  applyAttributesToEl,
+} from './helpers/dom.helpers'
+
+import {
+  type ApzStyles,
+  type ApzAttributes,
+} from './types.js'
 
 const copyObject = (obj: any) => JSON.parse(JSON.stringify(obj))
 
@@ -36,8 +45,8 @@ export class AplazameIFrame extends EventEmitter {
   mount_el?: HTMLElement
   iframe?: HTMLIFrameElement
 
-  currentStyles: { [key: string]: unknown, important?: Record<string, string> } = {}
-  currentAttributes: { [key: string]: string } = {}
+  currentStyles: ApzStyles = {}
+  currentAttributes: ApzAttributes = {}
 
   constructor ({
     url = null,
@@ -103,8 +112,8 @@ export class AplazameIFrame extends EventEmitter {
     this.iframe = document.createElement('iframe')
     this.iframe.src = this.url.toString()
 
-    this.applyStyles()
-    this.applyAttributes()
+    applyStylesToEl(this.iframe, this.currentStyles)
+    applyAttributesToEl(this.iframe, this.currentAttributes)
 
     el.appendChild(this.iframe)
 
@@ -117,12 +126,12 @@ export class AplazameIFrame extends EventEmitter {
     return this
   }
 
-  addStylesPreset (name: string, styles: { [key: string]: string }) {
+  addStylesPreset (name: string, styles: ApzStyles) {
     this.iframeStylesPresets[name] = styles
     return this
   }
 
-  setStyles (styles: { [key: string]: unknown, important?: Record<string, string> } | string = {}) {
+  setStyles (styles: ApzStyles | string = {}) {
     const newSytles = typeof styles === 'string'
       ? (this.iframeStylesPresets[styles] ?? {})
       : styles
@@ -136,47 +145,15 @@ export class AplazameIFrame extends EventEmitter {
       },
     }
 
-    this.applyStyles()
+    if (this.iframe) applyStylesToEl(this.iframe, this.currentStyles)
 
     return this
   }
 
-  applyStyles (styles = this.currentStyles) {
-    const iframe = this.iframe
-
-    if (iframe) {
-      Object.keys(styles).forEach(key => {
-        if (key === 'important') {
-          for (const key in styles.important) {
-            iframe.style.setProperty(key, String(styles.important[key]), 'important')
-          }
-          return
-        }
-
-        if (styles[key] === null) iframe.style.removeProperty(key)
-        else iframe.style.setProperty(key, String(styles[key]))
-      })
-    }
-    return this
-  }
-
-  setAttributes (attributes: { [key: string]: string }) {
+  setAttributes (attributes: ApzAttributes) {
     this.currentAttributes = { ...this.currentAttributes, ...attributes }
 
-    this.applyAttributes()
-
-    return this
-  }
-
-  applyAttributes (attributes = this.currentAttributes) {
-    const iframe = this.iframe
-
-    if (iframe) {
-      for (const key in attributes) {
-        if (attributes[key] === null) iframe.removeAttribute(key)
-        else iframe.setAttribute(key, attributes[key])
-      }
-    }
+    if (this.iframe) applyAttributesToEl(this.iframe, this.currentAttributes)
 
     return this
   }
