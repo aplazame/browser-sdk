@@ -8,24 +8,20 @@ npm i @aplazame/browser
 import { AplazameIFrame } from '@aplazame/browser'
 
 const apzIframe = new AplazameIFrame({
-    url: 'https://aplazame.com/app',
+    url: 'https://checkout.aplazame.com',
     searchParams: {
-        publicKey: 'foobar',
+        order: 'checkout_id',
+        public_key: 'merchant_public_key',
     },
 })
-
-apzIframe
-    .mount(document.querySelector('#iframe_container'))
-
-apzIframe
-    .on('status', e => {
-        console.log('status received from iframe:')
-        console.log('details', e.details)
+    .on('close', ({ details: { status, statusReason } }) => {
+        console.log('checkout has being closed with:', {
+            status,
+            statusReason,
+        })
+        apzIframe.unmount()
     })
-
-function onSubmit () {
-    apzIframe.request('submit')
-}
+    .mount(document.querySelector('#iframe_container'))
 ```
 
 ### AplazameIFrame object
